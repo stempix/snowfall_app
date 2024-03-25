@@ -17,53 +17,36 @@ MainWindow::MainWindow(QWidget *parent)
                     // Задание размеров снежинки
                     snowflake->resize(25, 25);
                     // Задание позиции снежники
-                    snowflake->move(    QRandomGenerator::global()->bounded(0, this->width() - snowflake->width())
+                    snowflake->move(    QRandomGenerator::global()->bounded(0, width() - snowflake->width())
                                     ,   QRandomGenerator::global()->bounded(100));
                     snowflake->show();
                     // Создание таймера интервала перемещения снежинки
                     QTimer* snowflake_timer = new QTimer(snowflake);
                     // Установка скорости снежинки
-                    int snowflake_speed = QRandomGenerator::global()->bounded(30, 100);
-                    snowflake_timer->setInterval(snowflake_speed);
+                    snowflake_timer->setInterval(QRandomGenerator::global()->bounded(30, 100));
                     snowflake_timer->start();
                     // Подключение сигнала на удаление снежинки при нажатии на нее
-                    QObject::connect(snowflake, &QPushButton::clicked, [snowflake]{snowflake->deleteLater();});
+                    QObject::connect(snowflake, &QPushButton::clicked, snowflake, &QObject::deleteLater);
                     // Подключение сигнала на обработку наведения курсора на снежинку и обработку ее позиции
                     QObject::connect(
                                 snowflake_timer,
                                 &QTimer::timeout,
-                                this,
-                                [this, snowflake, snowflake_timer, snowflake_speed]{
-                                    // Получение координат курсора в окне
-                                    QPoint cursorPos = this->mapFromGlobal(QCursor::pos());
-                                    int xCursor = cursorPos.x();
-                                    int yCursor = cursorPos.y();
-                                    int xSnowflake = snowflake->x();
-                                    int ySnowflake = snowflake->y();
-                                    // Сравнение положения курсора с положением снежинки
-                                    if (xCursor >= xSnowflake
-                                            && xCursor <= xSnowflake + snowflake->width()
-                                            && yCursor >= ySnowflake
-                                            && yCursor <= ySnowflake + snowflake->height())
-                                        // Увеличение скорости снежинки при наведении курсора на нее
-                                        snowflake_timer->setInterval(snowflake_speed / 2);
-                                    else
-                                        snowflake_timer->setInterval(snowflake_speed);
+                                snowflake,
+                                [this, snowflake, snowflake_timer]{
+                                    // Определение скорости снежинки в зависимости от положения курсора
+                                    const int speed = snowflake->underMouse() ? 2 : 1;
                                     // Перемещение снежинки на один пиксель вниз
-                                    snowflake->move(xSnowflake, ySnowflake + 1);
+                                    snowflake->move(snowflake->x(), snowflake->y() + speed);
                                     // Проверка достижения снежинки низа окна приложения
-                                    if (ySnowflake + snowflake->height() >= this->height())
+                                    if (snowflake->y() + snowflake->height() >= height())
                                     {
-                                        this->setWindowTitle(QStringLiteral("YOU LOSE"));
-                                        this->setPalette(QPalette(Qt::red));
+                                        setWindowTitle(QStringLiteral("YOU LOSE"));
+                                        setPalette(QPalette(Qt::red));
                                         snowflake->deleteLater();
                                     }
-                                    // Перезапуск таймера перемещения снежинки
-                                    snowflake_timer->start();
-                                    }
+                                }
                     );
-                    this->m_timer->setInterval(QRandomGenerator::global()->bounded(100, 1000));
-                    this->m_timer->start();
+                    m_timer->setInterval(QRandomGenerator::global()->bounded(100, 1000));
                 }
     );
 }
