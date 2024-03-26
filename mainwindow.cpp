@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent)
                     QTimer* snowflake_timer = new QTimer(snowflake);
                     // Установка скорости снежинки
                     snowflake_timer->setInterval(QRandomGenerator::global()->bounded(30, 100));
-                    snowflake_timer->start();
                     // Подключение сигнала на удаление снежинки при нажатии на нее
                     QObject::connect(snowflake, &QPushButton::clicked, snowflake, &QObject::deleteLater);
                     // Подключение сигнала на обработку наведения курсора на снежинку и обработку ее позиции
@@ -32,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
                                 snowflake_timer,
                                 &QTimer::timeout,
                                 snowflake,
-                                [this, snowflake, snowflake_timer]{
+                                [this, snowflake]{
                                     // Определение скорости снежинки в зависимости от положения курсора
                                     const int speed = snowflake->underMouse() ? 2 : 1;
                                     // Перемещение снежинки на один пиксель вниз
@@ -46,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
                                     }
                                 }
                     );
+                    snowflake_timer->start();
                     m_timer->setInterval(QRandomGenerator::global()->bounded(100, 1000));
                 }
     );
